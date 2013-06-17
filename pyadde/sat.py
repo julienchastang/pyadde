@@ -4,11 +4,13 @@ import numpy as np
 import zlib 
 import matplotlib.pyplot as plt
 
+ADDE_HOST = "adde.ucar.edu"
+
 class mysocket:
     '''Socket class'''
 
     def __init__(self, sock=None):
-        ''''''
+        '''Initialize the socket'''
         if sock is None:
             self.sock = socket.socket(
                 socket.AF_INET, socket.SOCK_STREAM)
@@ -16,21 +18,21 @@ class mysocket:
             self.sock = sock
 
     def connect(self, host, port):
-        ''''''
+        '''Socket connection, given a host and port'''
         self.sock.connect((host, port))
 
     def close(self):
-        ''''''
+        '''Close the socket'''
         self.sock.close()
 
     def send(self, msg):
-        ''''''
+        '''Send data to the socket'''
         sent = self.sock.send(msg[0:])
-     	if sent == 0:
+        if sent == 0:
            raise RuntimeError("socket connection broken")
 
     def receive(self):
-        ''''''
+        '''Receive data from the socket'''
         total_data=[]
         while True:
             data = self.sock.recv(8192)
@@ -41,12 +43,17 @@ class mysocket:
 def create_msg():
     '''Create the byte array that will be sent to the server.'''
     def myzeros(n):
+        '''For padding data'''
         a = []
         for i in range(n):
             a.append(0)    
         return bytearray(a)
+    # ADDE version
     version = bytearray([0, 0, 0, 1])
-    ipa = bytearray([128, 117, 114, 120])
+    
+    ipa = bytearray(np.array(socket.gethostbyname(ADDE_HOST).split('.'), 
+                             dtype = 'uint8'))
+
     port = bytearray([0, 0, 0, 112])
     service = bytearray("aget")
     ipa2 = bytearray([128,117,140,98])
@@ -57,15 +64,19 @@ def create_msg():
     a  = bytearray([0, 0, 0, 146])
     b  = bytearray([0, 0, 0, 146])
     c = myzeros(116)
-    observation = bytearray("RTIMAGES GE-VIS 0 AC  700 864 X 700 864  BAND=1 LMAG=-2 EMAG=-2 TRACE=0 SPAC=1 UNIT=BRIT NAV=X AUX=YES TRACKING=0 DOC=X TIME=X X I CAL=X VERSION=1")
-    msg = version + ipa + port + service + ipa + port + ipa2 + user + empty_byte + project + passwd + service + a + b + c + observation 
+    observation = bytearray("RTIMAGES GE-VIS 0 AC  700 864 X 700 864  BAND=1 "
+    "LMAG=-2 EMAG=-2 TRACE=0 SPAC=1 UNIT=BRIT NAV=X AUX=YES TRACKING=0 DOC=X "
+    "TIME=X X I CAL=X VERSION=1")
+    msg = version + ipa + port + service + ipa + port + ipa2 + user \
+    + empty_byte + project + passwd + service + a + b + c + observation 
     return msg
 
 def display_data(data):
     '''Unpack the data and display the image'''
     meta = [0] * 65
     for i in range(65):
-        meta[i] = struct.unpack('i', data[3 + i*4] + data[2 + i*4] + data[1+ i*4] + data[0+ i*4])[0]
+        meta[i] = struct.unpack('i', data[3 + i*4] + data[2 + i*4] 
+                                + data[1+ i*4] + data[0 + i*4])[0]
 
     # i = 0 number of bytes
     # i = 4 year day
