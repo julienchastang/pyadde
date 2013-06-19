@@ -40,6 +40,20 @@ class mysocket:
             total_data.append(data)
         return ''.join(total_data)
 
+def get_local_ip():
+    '''Get the IP address of the local host'''
+    # http://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("gmail.com",80))
+    ip = s.getsockname()[0]
+    s.close()
+    return ip
+
+def get_bytearray_ip(host):
+    '''Given a host string, return a the IP address byte array'''
+    return bytearray(np.array(socket.gethostbyname(host).split('.'), 
+                             dtype = 'uint8'))
+
 def create_msg():
     '''Create the byte array that will be sent to the server.'''
     def myzeros(n):
@@ -51,12 +65,11 @@ def create_msg():
     # ADDE version
     version = bytearray([0, 0, 0, 1])
     
-    ipa = bytearray(np.array(socket.gethostbyname(ADDE_HOST).split('.'), 
-                             dtype = 'uint8'))
+    ipa = get_bytearray_ip(ADDE_HOST)
 
     port = bytearray([0, 0, 0, 112])
     service = bytearray("aget")
-    ipa2 = bytearray([128,117,140,98])
+    ipa2 = get_bytearray_ip(get_local_ip())
     user = bytearray("idv")
     empty_byte = bytearray(" ")
     project = struct.pack("i", 0)
