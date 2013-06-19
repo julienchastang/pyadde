@@ -76,12 +76,12 @@ def create_msg():
     passwd = myzeros(12)
     a  = bytearray([0, 0, 0, 146])
     b  = bytearray([0, 0, 0, 146])
-    c = myzeros(116)
+    zero_pad = myzeros(116)
     observation = bytearray("RTIMAGES GE-VIS 0 AC  700 864 X 700 864  BAND=1 "
     "LMAG=-2 EMAG=-2 TRACE=0 SPAC=1 UNIT=BRIT NAV=X AUX=YES TRACKING=0 DOC=X "
     "TIME=X X I CAL=X VERSION=1")
     msg = version + ipa + port + service + ipa + port + ipa2 + user \
-    + empty_byte + project + passwd + service + a + b + c + observation 
+    + empty_byte + project + passwd + service + a + b + zero_pad + observation 
     return msg
 
 def display_data(data):
